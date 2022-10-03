@@ -60,6 +60,17 @@ export bson_write, bson_write_simple, bson_write_structtype
 export bson_schema_version, bson_schema_version_field
 export bson_object_id_range
 
+export BSONSchema,
+    BSONDocument,
+    BSONField,
+    # BSONUnion,
+    # BSONUnionItem,
+    BSONAbstract,
+    SchemaBSONReader,
+    SchemaBSONWriter
+    # bson_union_key,
+    # bson_union_name
+
 bson_schema_version(::Type{T}) where T = nothing
 
 bson_schema_version_field(::Type{T}) where T = "_v"
@@ -78,5 +89,6 @@ include("writer.jl")
 include("write_buffer.jl")
 include("convenience.jl")
 include("fileio.jl")
+include("schema.jl")
 
 end

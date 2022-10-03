@@ -1,9 +1,10 @@
 name = "LightBSON"
 uuid = "a4a7f996-b3a6-4de6-b9db-2fa5f350df41"
 authors = ["Christian Rorvik <christian.rorvik@gmail.com>"]
-version = "0.2.14"
+version = "0.2.15"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DecFP = "55939f99-70c6-5e9b-8bb0-5071ed7d61fd"
