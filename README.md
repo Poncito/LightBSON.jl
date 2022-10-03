@@ -420,10 +420,10 @@ schema = BSONSchema(
 
 buf = UInt8[]
 writer = SchemaBSONWriter(schema, BSONWriter(buf))
-writer[] = $((;a=[1,2], b=(;c=2.0))) # ok
-empty!(buf); writer[] = $((;a=[1,2], b=(;c=2))) # ok, 2 will be converted into float
-empty!(buf); writer[] = $((;a=[1,2], b=(;d=2.0))) # not ok, expected field :c and not :d
-empty!(buf); writer[] = $((;a=[1,2], b=(;c=2.0, d=3.0))) # ok, field :d is ignored
+writer[] = (;a=[1,2], b=(;c=2.0)) # ok
+empty!(buf); writer[] = (;a=[1,2], b=(;c=2)) # ok, 2 will be converted into float
+empty!(buf); writer[] = (;a=[1,2], b=(;d=2.0)) # not ok, expected field :c and not :d
+empty!(buf); writer[] = (;a=[1,2], b=(;c=2.0, d=3.0)) # ok, field :d is ignored
 close(writer)
 
 reader = SchemaBSONReader(schema, BSONReader(buf))::AbstractBSONReader  # can be constructed with any AbstractBSONReader
