@@ -400,6 +400,69 @@ id1 != id2 # true, IDs are unique
 collect(bson_object_id_range(5)) # 5 IDs with equal timestamp and different sequence field
 ```
 
+## Schema
+By defining a _schema_ (with `BSONSchema`), the user can,
+- impose some additional validations when serializing a object
+- reduce the boilerplate syntax of the low-level API when reading a BSON
+```Julia
+BSONDocument(
+schema = BSONSchema(
+    BSONDocument(
+        BSONField(:a, Int64),
+        BSONField(
+            :b,
+            BSONDocument(
+                BSONField(:c, Float64),           
+            )
+        ),
+    ),
+    version = Int32(1),
+)
+
+buf = UInt8[]
+writer = SchemaBSONWriter(schema, BSONWriter(buf))
+writer[] = $((;a=1, b=(;c=2.0))) # ok
+empty!(buf); writer[] = $((;a=1, b=(;c=2))) # ok, 2 will be converted into float
+empty!(buf); writer[] = $((;a=1, b=(;d=2.0))) # not ok, expected field :c and not :d
+empty!(buf); writer[] = $((;a=1, b=(;c=2.0, d=3.0))) # ok, field :d is ignored
+close(writer)
+
+reader = SchemaBSONReader(schema, BSONReader(buf))::AbstractBSONReader  # can be constructed with any AbstractBSONReader
+reader.a # 1
+reader.b.c # 2.0
+bson_schema_version(reader) # Int32(1)
+```
+
+Sometimes, the schema is not fully defined. This is the case when a field is a union whose type is encoded on a specific field.
+Users can use `BSONAbstract` to read a partially known schema:
+```Julia
+schema = field -> BSONSchema(
+    BSONDocument(
+        BSONField(:a, field),
+    ),
+    version = Int32(1)
+)
+schema2 = BSONSchema(
+    BSONDocument(
+        BSONField(:b, Int64),
+    ),
+    version = Int32(2)
+)
+
+buf = UInt8[]
+writer = SchemaBSONWriter(schema(schema2), BSONWriter(buf))
+writer[] = (;a=(;b=3))
+close(writer)
+reader1 = SchemaBSONReader(schema(BSONAbstract()), BSONReader(buf))
+bson_schema_version(reader1) # 1
+reader2 = SchemaBSONReader(schema2, reader1.a)
+bson_schema_version(reader2) # 2
+reader2.b # 3
+```
+
+
+### Simple Schema
+
 ## Related Packages
 * [BSON.jl](https://github.com/JuliaIO/BSON.jl) - Generic serialization of all Julia types to and from BSON.
 * [Mongoc.jl](https://github.com/felipenoris/Mongoc.jl) - Julia MongoDB client.
