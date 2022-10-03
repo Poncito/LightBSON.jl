@@ -405,10 +405,9 @@ By defining a _schema_ (with `BSONSchema`), the user can,
 - impose some additional validations when serializing a object
 - reduce the boilerplate syntax of the low-level API when reading a BSON
 ```Julia
-BSONDocument(
 schema = BSONSchema(
     BSONDocument(
-        BSONField(:a, Int64),
+        BSONField(:a, BSONArray(Int64)),
         BSONField(
             :b,
             BSONDocument(
@@ -421,14 +420,15 @@ schema = BSONSchema(
 
 buf = UInt8[]
 writer = SchemaBSONWriter(schema, BSONWriter(buf))
-writer[] = $((;a=1, b=(;c=2.0))) # ok
-empty!(buf); writer[] = $((;a=1, b=(;c=2))) # ok, 2 will be converted into float
-empty!(buf); writer[] = $((;a=1, b=(;d=2.0))) # not ok, expected field :c and not :d
-empty!(buf); writer[] = $((;a=1, b=(;c=2.0, d=3.0))) # ok, field :d is ignored
+writer[] = $((;a=[1,2], b=(;c=2.0))) # ok
+empty!(buf); writer[] = $((;a=[1,2], b=(;c=2))) # ok, 2 will be converted into float
+empty!(buf); writer[] = $((;a=[1,2], b=(;d=2.0))) # not ok, expected field :c and not :d
+empty!(buf); writer[] = $((;a=[1,2], b=(;c=2.0, d=3.0))) # ok, field :d is ignored
 close(writer)
 
 reader = SchemaBSONReader(schema, BSONReader(buf))::AbstractBSONReader  # can be constructed with any AbstractBSONReader
-reader.a # 1
+reader.a[1] # 1
+reader.a[2] # 2
 reader.b.c # 2.0
 bson_schema_version(reader) # Int32(1)
 ```

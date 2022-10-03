@@ -63,13 +63,10 @@ export bson_object_id_range
 export BSONSchema,
     BSONDocument,
     BSONField,
-    # BSONUnion,
-    # BSONUnionItem,
     BSONAbstract,
+    BSONArray,
     SchemaBSONReader,
     SchemaBSONWriter
-    # bson_union_key,
-    # bson_union_name
 
 bson_schema_version(::Type{T}) where T = nothing
 
